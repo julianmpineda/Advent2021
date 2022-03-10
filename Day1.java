@@ -1,27 +1,40 @@
-	public static int day1() {
+	public static void day1() {
 
-		int count = 0;
+		List<Integer> sweepReport = new ArrayList<Integer>();
+		int count = 0, line = 1;
+		
 		try {
 			File myObj = new File("advent1.txt");
-			File myObj2 = new File("advent1.5.txt");
 			Scanner myReader = new Scanner(myObj);
-			Scanner myReader2 = new Scanner(myObj2);
-      
-			while (myReader2.hasNextLine()) {
+
+			while (myReader.hasNextLine()) {
 				String nextLine = myReader.nextLine();
-				String winEnd = myReader2.nextLine();
-				int data = Integer.valueOf(nextLine);
-				int data2 = Integer.valueOf(winEnd);
-				if (data2 > data) {
-					count++;
-				}
+				sweepReport.add(Integer.valueOf(nextLine));
 			}
-      
 			myReader.close();
-			myReader2.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("An error occurred.");
 			e.printStackTrace();
 		}
-		return count;
+
+		//Part 1
+		while (line < sweepReport.size()) {
+			if (sweepReport.get(line - 1) < sweepReport.get(line)) {
+				count++;
+			}
+			line++;
+		}
+		System.out.println("Part 1: " + count);			
+		
+		//Part 2
+		line = 3;
+		count = 0;
+		
+		while (line < sweepReport.size()) {
+			if (sweepReport.get(line - 3) < sweepReport.get(line)) {
+				count++;
+			}
+			line++;
+		}
+		System.out.println("Part 2: " + count);	
 	}
