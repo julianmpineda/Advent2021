@@ -16,7 +16,7 @@ public static void day2() {
     }
     //Part 1
     for (int i = 0; i < heading.size(); i++) {
-        String[] direction = heading.get(i).toCharArray();
+        String[] direction = heading.get(i).split(" ");
         int distance = Integer.parseInt(direction[1]);
         if (direction[0].contains("forward")) {
             position += distance;
@@ -29,8 +29,12 @@ public static void day2() {
     System.out.println("Part 1: " + (position * depth));
     
     //Part 2
+    
+    position = 0;
+    depth = 0;
+    
     for (int j = 0; j < heading.size(); j++) {
-        String[] direction = heading.get(i).split(" ");
+        String[] direction = heading.get(j).split(" ");
         int distance = Integer.parseInt(direction[1]);
         if (direction[0].contains("forward")) {
             position += distance;
