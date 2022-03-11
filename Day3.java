@@ -1,55 +1,46 @@
 public static int day3() {
 
-		int[] ones = new int[12];
-		int[] zeroes = new int[12];
-		int[] gamma = new int[12];
-		int[] epsilon = new int[12];
+    List<String> diagnostic = new ArrayList<String>();
+	int[] zeroes = new int[12];
+    String gamma = "", epsilon = "";
 
-		try {
-			File myObj = new File("advent3.txt");
-			Scanner myReader = new Scanner(myObj);
+	try {
+		File myObj = new File("advent3.txt");
+		Scanner myReader = new Scanner(myObj);
 
-			while (myReader.hasNextLine()) {
-				String log = myReader.nextLine();
-				for (int i = 0; i < 12; i++) {
-					int bin = Character.getNumericValue(log.charAt(i));
-
-					if (bin == 0) {
-						zeroes[i] += 1;
-					} else {
-						ones[i] += 1;
-					}
-				}
-			}
-			myReader.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("An error occurred.");
-			e.printStackTrace();
+		while (myReader.hasNextLine()) {
+			diagnostic.add(myReader.nextLine());
 		}
-
-		for (int j = 0; j < 12; j++) {
-			if (ones[j] > zeroes[j]) {
-				gamma[j] = 0;
-				epsilon[j] = 1;
-			} else {
-				gamma[j] = 1;
-				epsilon[j] = 0;
-			}
+		
+		myReader.close();
+	} catch (FileNotFoundException e) {
+		System.out.println("An error occurred.");
+		e.printStackTrace();
+	}
+    
+    int middle = diagnostic.size()/2;
+    
+    //Part 1
+    
+    for (int i = 0; i < diagnostic.size(); i++) {
+        for (int j = 0; j < 12; j++) {
+            if (diagnostic.get(i).charAt(j) == '0') {
+                zeroes[j] += 1;
+            }
+	    }
+    }
+    
+    for (int k = 0; k < 12; k++) {
+        if (zeroes[k] > middle) {
+            gamma += "0";
+            epsilon += "1";
+		} else {
+            gamma += "1";
+            epsilon += "0";
 		}
-
-		return convertBinary(gamma) * convertBinary(epsilon);
 	}
 
-	public static int convertBinary(int[] bin) {
-
-		int ans = 0;
-
-		for (int i = bin.length - 1; i >= 0; i--) {
-			if (bin[i] == 1) {
-				ans += Math.pow(2, ((bin.length - 1) - i));
-			}
-		}
-		return ans;
+		return Integer.parseInt(gamma, 2) * Intger.parseInt(epsilon, 2);
 	}
 
 	public static int day3pt2() {
