@@ -1,146 +1,100 @@
-	public static int day5() {
+public static void day5() {
 
-		int[][] map = new int[1000][1000];
-		int[] range = new int[4];
-		int answer = 0;
+	List<String> vents = new ArrayList<String>();
+	Map<String, Integer> ventsMap = new HashMap<String, Integer>();
 
-		try {
-			File myObj = new File("advent5.txt");
-			Scanner myReader = new Scanner(myObj);
-			while (myReader.hasNextLine()) {
-				String vent = myReader.nextLine();
-				range = getRange(vent);
+	try {
+		File myObj = new File("advent5.txt");
+		Scanner myReader = new Scanner(myObj);
+		while (myReader.hasNextLine()) {
+			vents.add(myReader.nextLine());
+			}
+		myReader.close();
+	} catch (FileNotFoundException e) {
+		System.out.println("An error occurred.");
+		e.printStackTrace();
+	}
+    
+    //Part 1
 
-				int count = 0;
-				while (count < 4) {
-					System.out.print(range[count] + " ");
-					count++;
-				}
-				System.out.println();
+	for (int i = vents.size() - 1; i >= 0; i--) {
+		int[] range = Arrays.stream(vents.get(i).split(",| -> ")).mapToInt(Integer::parseInt).toArray();
 
-				// y = 0: fixed x
-				if (range[1] == 0) {
-					for (int i = range[2]; i <= range[3]; i++) {
-						map[range[0]][i]++;
-					}
-					// x = 0: fixed y
-				} else if (range[0] == 0) {
-					for (int i = range[2]; i <= range[3]; i++) {
-						map[i][range[1]]++;
-					}
+		if (range[0] == range[2] | range[1] == range[3]) {
+			vents.remove(i);
+		}
+
+		if (range[0] == range[2]) { // fixed X
+			int min = Math.min(range[1], range[3]);
+			int max = Math.max(range[1], range[3]);
+
+			for (int j = min; j <= max; j++) {
+				String point = "" + range[0] + "," + j;
+				if (ventsMap.containsKey(point)) {
+					ventsMap.put(point, ventsMap.get(point) + 1);
 				} else {
-
-					int x = range[0], y = range[1], run = range[0] - range[2], points = 0;
-					while (points <= run) {
-						if (range[1] > range[3]) {
-							map[x][y]++;
-							x--;
-							y--;
-							points++;
-						} else {
-							map[x][y]++;
-							x--;
-							y++;
-							points++;
-						}
-					}
+					ventsMap.put(point, 1);
 				}
 			}
-			myReader.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("An error occurred.");
-			e.printStackTrace();
-		}
 
-		printMap(map);
+		} else if (range[1] == range[3]) { // fixed Y
 
-		for (int i = 0; i < map.length; i++) {
-			for (int j = 0; j < map.length; j++) {
-				if (map[i][j] > 1) {
-					answer++;
+			int min = Math.min(range[0], range[2]);
+			int max = Math.max(range[0], range[2]);
+
+			for (int j = min; j <= max; j++) {
+				String point = "" + j + "," + range[1];
+				if (ventsMap.containsKey(point)) {
+					ventsMap.put(point, ventsMap.get(point) + 1);
+				} else {
+					ventsMap.put(point, 1);
 				}
 			}
 		}
-
-		return answer;
 	}
 
-	public static int[] getRange(String coor) {
+	int count = 0;
 
-		int[] ret = new int[4];
-		String[] splitstr = coor.split(",| -> ");
-		int[] split = new int[4];
+	for (int value : ventsMap.values()) {
+		if (value > 1) {
+			count++;
+		}
+	}
 
-		for (int i = 0; i < 4; i++) {
-			split[i] = Integer.parseInt(splitstr[i]);
+	System.out.println("Part 1: " + count);
+    
+    //Part 2
+
+	for (int i = vents.size() - 1; i >= 0; i--) {
+			
+		int[] range = Arrays.stream(vents.get(i).split(",| -> ")).mapToInt(Integer::parseInt).toArray();
+		int directionX = 1, directionY = 1;
+		int len = Math.abs(range[0] - range[2]);
+		if (range[0] > range[2]) {
+			directionX = -1;
 		}
 
-		if (split[0] == split[2]) {
-			ret[0] = split[0];
-			ret[1] = 0;
-			ret[2] = Math.min(split[1], split[3]);
-			ret[3] = Math.max(split[1], split[3]);
-		} else if (split[1] == split[3]) {
-			ret[0] = 0;
-			ret[1] = split[1];
-			ret[2] = Math.min(split[0], split[2]);
-			ret[3] = Math.max(split[0], split[2]);
-		} else {
-			int xchange = split[0] - split[2];
-			int ychange = split[1] - split[3];
+		if (range[1] > range[3]) {
+			directionY = -1;
+		}
 
-			if (Math.abs(ychange) == Math.abs(xchange)) {
-
-				int index = 0, index2 = 2;
-
-				if (split[2] < split[0]) {
-					index = 2;
-					index2 = 0;
-				}
-
-				ret[0] = split[index2];
-				ret[1] = split[index2 + 1];
-				ret[2] = split[index];
-				ret[3] = split[index + 1];
+		for (int j = 0; j <= len; j++) {
+			String point = "" + (range[0] + (j * directionX)) + "," + (range[1] + (j * directionY));
+			if (ventsMap.containsKey(point)) {
+				ventsMap.put(point, ventsMap.get(point) + 1);
 			} else {
-				return new int[] { 0, 0, 0, 0 };
+				ventsMap.put(point, 1);
 			}
-		}
-
-		return ret;
-
-	}
-
-	public static void printMap(int[][] map) {
-
-		File myObj2 = new File("map.txt");
-		myObj2.delete();
-
-		try {
-			File myObj = new File("map.txt");
-			if (myObj.createNewFile()) {
-				System.out.println("File created: " + myObj.getName());
-			} else {
-				System.out.println("File already exists.");
-			}
-		} catch (IOException e) {
-			System.out.println("An error occurred.");
-			e.printStackTrace();
-		}
-
-		try {
-			FileWriter myWriter = new FileWriter("map.txt");
-			for (int i = 0; i < map.length; i++) {
-				myWriter.write(i + ": ");
-				for (int j = 0; j < map.length; j++) {
-					myWriter.write(map[i][j] + " ");
-				}
-				myWriter.write("\n");
-			}
-			myWriter.close();
-			System.out.println("Successfully wrote to the file.");
-		} catch (IOException e) {
-			System.out.println("An error occurred.");
-			e.printStackTrace();
 		}
 	}
+		
+	count = 0;
+		
+	for (int value : ventsMap.values()) {
+		if (value > 1) {
+			count++;
+		}
+	}
+
+	System.out.println("Part 2: " + count);
+}
