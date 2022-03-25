@@ -1,3 +1,5 @@
+private static int[][] lavaMap = new int[100][100];
+
 public static int[] day9() {
 
 	int sum = 0, base = 0, count = 0;
