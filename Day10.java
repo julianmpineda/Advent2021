@@ -1,105 +1,107 @@
-public static long[] day10() {
+	public static void day10new() {
 
-	int ans1 = 0;
-	long ans2 = 0;
-	ArrayList<Character> bracket = new ArrayList<Character>();
-	ArrayList<String> incompletes = new ArrayList<String>();
-	ArrayList<Long> scores2 = new ArrayList<Long>();
-	int[] scores1 = new int[] { 3, 57, 1197, 25137 };
-	int[] close = new int[4]; // { ')', ']', '}', '>' }
+		List<String> subsystem = new ArrayList<String>();
 
-	// Part 1 code - also builds part 2 data
+		try {
+			File myObj = new File("advent10.txt");
+			Scanner myReader = new Scanner(myObj);
+			while (myReader.hasNextLine()) {
+				subsystem.add(myReader.nextLine());
+			}
+			myReader.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}
 
-	try {
-		File myObj = new File("advent10.txt");
-		Scanner myReader = new Scanner(myObj);
-		while (myReader.hasNextLine()) {
-			boolean flag = true;
-			String line = myReader.nextLine();
-			for (int i = 0; i < line.length() && flag; i++) {
-				char c = line.charAt(i);
-				if (c == '(' || c == '[' || c == '{' || c == '<') {
-					bracket.add(c);
-				} else {
-					int end = bracket.size() - 1;
-					char p = bracket.get(end);
-					if (c == ')') {
-						if (p != '(') {
-							close[0]++;
-							flag = false;
-						} else {
-							bracket.remove(end);
-						}
-					} else if (c == ']') {
-						if (p != '[') {
-							close[1]++;
-							flag = false;
-						} else {
-							bracket.remove(end);
-						}
-					} else if (c == '}') {
-						if (p != '{') {
-							close[2]++;
-							flag = false;
-						} else {
-							bracket.remove(end);
-						}
-					} else if (c == '>') {
-						if (p != '<') {
-							close[3]++;
-							flag = false;
-						} else {
-							bracket.remove(end);
-						}
+		String open = "([{<";
+		String close = ")]}>";
+		String pair = "()[]{}<>";
+		String corrupted = "";
+		int sum = 0;
+		List<String> completed = new ArrayList<String>();
+
+		for (int i = subsystem.size() - 1; i >= 0; i--) {
+			List<Character> fakeStack = new ArrayList<Character>();
+			String line = subsystem.get(i);
+			boolean found = false;
+
+			for (int j = 0; j < line.length() && !found; j++) {
+
+				if (open.contains("" + line.charAt(j))) {
+					fakeStack.add(line.charAt(j));
+				} else if (close.contains("" + line.charAt(j))) {
+					String test = "" + fakeStack.get(fakeStack.size() - 1) + line.charAt(j);
+					if (!pair.contains(test)) {
+						corrupted += line.charAt(j);
+						subsystem.remove(i);
+						found = true;
+					} else {
+						fakeStack.remove(fakeStack.size() - 1);
 					}
 				}
 			}
-			if (!bracket.isEmpty() && flag) {
-				incompletes.add(line);
-			}
-			bracket.clear();
-		}
-		myReader.close();
-	} catch (FileNotFoundException e) {
-		System.out.println("An error occurred.");
-		e.printStackTrace();
-	}
 
-	for (int i = 0; i < 4; i++) {
-		ans1 += close[i] * scores1[i];
-	}
-
-    // Part 2 Code
-
-	for (int i = 0; i < incompletes.size(); i++) {
-
-		char[] line = incompletes.get(i).toCharArray();
-		for (int j = 0; j < line.length; j++) {
-			if (line[j] == '(' || line[j] == '[' || line[j] == '{' || line[j] == '<') {
-				bracket.add(line[j]);
-			} else {
-				bracket.remove(bracket.size() - 1);
+			if (!found) {
+				String complete = "";
+				for (int k = 0; k < fakeStack.size(); k++) {
+					complete += fakeStack.get(k);
+				}
+				completed.add(complete);
 			}
 		}
-			long sum = 0;
-		for (int k = bracket.size() - 1; k >= 0; k--) {
-			if (bracket.get(k) == '(') {
-				sum = sum * 5 + 1;
-			} else if (bracket.get(k) == '[') {
-				sum = sum * 5 + 2;
-			} else if (bracket.get(k) == '{') {
-				sum = sum * 5 + 3;
-			} else if (bracket.get(k) == '<') {
-				sum = sum * 5 + 4;
+
+		//Part 1
+		
+		for (int i = 0; i < corrupted.length(); i++) {
+			char next = corrupted.charAt(i);
+			switch (next) {
+			case ')':
+				sum += 3;
+				break;
+			case ']':
+				sum += 57;
+				break;
+			case '}':
+				sum += 1197;
+				break;
+			case '>':
+				sum += 25137;
+				break;
 			}
 		}
-		bracket.clear();
-		scores2.add(sum);
 
+		System.out.println("Part 1: " + sum);
+		
+		//Part 2
+		
+		List<Long> scores = new ArrayList<Long>();
+		
+		for (int i = 0; i < completed.size(); i++) {
+			Long longSum = 0L;
+			for (int j = completed.get(i).length()-1; j >= 0; j--) {
+				longSum *= 5;
+				char next = completed.get(i).charAt(j);
+				switch (next) {
+				case '(':
+					longSum += 1;
+					break;
+				case '[':
+					longSum += 2;
+					break;
+				case '{':
+					longSum += 3;
+					break;
+				case '<':
+					longSum += 4;
+					break;
+				}
+				
+			}
+			scores.add(longSum);
+		}
+		
+		Collections.sort(scores);
+
+		System.out.println("Part 2: " + scores.get(scores.size()/2));
 	}
-
-	Collections.sort(scores2);
-	ans2 = scores2.get((scores2.size() / 2));
-
-    return new long[] { ans1, ans2 };
-}
