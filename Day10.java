@@ -1,105 +1,104 @@
-public static long[] day10() {
+public static void day10() {
 
-	int ans1 = 0;
-	long ans2 = 0;
-	ArrayList<Character> bracket = new ArrayList<Character>();
-	ArrayList<String> incompletes = new ArrayList<String>();
-	ArrayList<Long> scores2 = new ArrayList<Long>();
-	int[] scores1 = new int[] { 3, 57, 1197, 25137 };
-	int[] close = new int[4]; // { ')', ']', '}', '>' }
-
-	// Part 1 code - also builds part 2 data
+	List<String> subsystem = new ArrayList<String>();
 
 	try {
-		File myObj = new File("advent10.txt");
+		File myObj = new File("10.txt");
 		Scanner myReader = new Scanner(myObj);
 		while (myReader.hasNextLine()) {
-			boolean flag = true;
-			String line = myReader.nextLine();
-			for (int i = 0; i < line.length() && flag; i++) {
-				char c = line.charAt(i);
-				if (c == '(' || c == '[' || c == '{' || c == '<') {
-					bracket.add(c);
-				} else {
-					int end = bracket.size() - 1;
-					char p = bracket.get(end);
-					if (c == ')') {
-						if (p != '(') {
-							close[0]++;
-							flag = false;
-						} else {
-							bracket.remove(end);
-						}
-					} else if (c == ']') {
-						if (p != '[') {
-							close[1]++;
-							flag = false;
-						} else {
-							bracket.remove(end);
-						}
-					} else if (c == '}') {
-						if (p != '{') {
-							close[2]++;
-							flag = false;
-						} else {
-							bracket.remove(end);
-						}
-					} else if (c == '>') {
-						if (p != '<') {
-							close[3]++;
-							flag = false;
-						} else {
-							bracket.remove(end);
-						}
-					}
-				}
+			subsystem.add(myReader.nextLine());
 			}
-			if (!bracket.isEmpty() && flag) {
-				incompletes.add(line);
-			}
-			bracket.clear();
-		}
 		myReader.close();
 	} catch (FileNotFoundException e) {
 		System.out.println("An error occurred.");
 		e.printStackTrace();
 	}
 
+	String open = "([{<";
+	String close = ")]}>";
+	String pairs = "()[]{}<>";
+	int[] scores1 = new int[] { 3, 57, 1197, 25137 };
+	int[] corrupted = new int[4]; // { ')', ']', '}', '>' }
+	int sum = 0;
+	List<String> incomplete = new ArrayList<String>();
+
+    for (int i = subsystem.size() - 1; i >= 0; i--) {
+			
+		String fakeStack = "";
+		String line = subsystem.get(i);
+        boolean found = false;
+
+		for (int j = 0; j < line.length() && !found; j++) {
+			char bracket = line.charAt(j);
+				
+			//prompt assumes it always opens with a character from "open"
+			if (open.contains("" + bracket)) {
+				fakeStack += bracket;
+			} else if (close.contains("" + bracket)) {
+				String chunk = "" + fakeStack.charAt(fakeStack.length() - 1) + bracket;
+				
+    			if (!pairs.contains(chunk)) {
+					switch (bracket) {
+					case ')':
+						corrupted[0]++;
+						break;
+					case ']':
+						corrupted[1]++;
+						break;
+					case '}':
+						corrupted[2]++;
+						break;
+					case '>':
+						corrupted[3]++;
+						break;
+					}
+					subsystem.remove(i);
+					found = true;
+				} else {
+					fakeStack = fakeStack.substring(0, fakeStack.length() - 1);
+				}
+			}
+		}
+		if (!found) {
+			incomplete.add(fakeStack);
+		}
+	}
+
+	// Part 1
 	for (int i = 0; i < 4; i++) {
-		ans1 += close[i] * scores1[i];
+		sum += corrupted[i] * scores1[i];
 	}
 
-    // Part 2 Code
+	System.out.println("Part 1: " + sum);
 
-	for (int i = 0; i < incompletes.size(); i++) {
+	// Part 2
 
-		char[] line = incompletes.get(i).toCharArray();
-		for (int j = 0; j < line.length; j++) {
-			if (line[j] == '(' || line[j] == '[' || line[j] == '{' || line[j] == '<') {
-				bracket.add(line[j]);
-			} else {
-				bracket.remove(bracket.size() - 1);
+	List<Long> scores = new ArrayList<Long>();
+
+	for (int i = 0; i < incomplete.size(); i++) {
+		Long longSum = 0L;
+			
+		for (int j = incomplete.get(i).length() - 1; j >= 0; j--) {
+			longSum *= 5;
+			char next = incomplete.get(i).charAt(j);
+			switch (next) {
+			case '(':
+				longSum += 1;
+				break;
+			case '[':
+				longSum += 2;
+				break;
+			case '{':
+				longSum += 3;
+				break;
+			case '<':
+				longSum += 4;
+				break;
 			}
 		}
-			long sum = 0;
-		for (int k = bracket.size() - 1; k >= 0; k--) {
-			if (bracket.get(k) == '(') {
-				sum = sum * 5 + 1;
-			} else if (bracket.get(k) == '[') {
-				sum = sum * 5 + 2;
-			} else if (bracket.get(k) == '{') {
-				sum = sum * 5 + 3;
-			} else if (bracket.get(k) == '<') {
-				sum = sum * 5 + 4;
-			}
-		}
-		bracket.clear();
-		scores2.add(sum);
-
+		scores.add(longSum);
 	}
 
-	Collections.sort(scores2);
-	ans2 = scores2.get((scores2.size() / 2));
-
-    return new long[] { ans1, ans2 };
+	Collections.sort(scores);
+	System.out.println("Part 2: " + scores.get(scores.size() / 2));
 }
