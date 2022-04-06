@@ -1,3 +1,6 @@
+private static List<String> end = new ArrayList<String>();
+private static Map<String, List<String>> paths = new HashMap<String, List<String>>();
+
 public static int[] day12() {
 
 	ArrayList<String> tokens = new ArrayList<String>();
